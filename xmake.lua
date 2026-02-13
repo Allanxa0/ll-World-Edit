@@ -17,7 +17,7 @@ if not has_config("vs_runtime") then
     set_runtimes("MD")
 end
 
-target("my-mod")
+target("World-Edit")
     add_rules("@levibuildscript/linkrule")
     add_rules("@levibuildscript/modpacker")
 
