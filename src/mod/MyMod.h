@@ -13,7 +13,7 @@ public:
 
     [[nodiscard]] ll::mod::NativeMod& getSelf() const { return mSelf; }
 
-    /// @return True if the mod is loaded successfully.
+    /// @return True if the mod is loaded successfully
     bool load();
 
     /// @return True if the mod is enabled successfully.
