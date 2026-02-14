@@ -1,6 +1,7 @@
-
 #include "ll/api/command/CommandRegistrar.h"
+#include "ll/api/command/CommandHandle.h"
 #include "ll/api/command/Command.h"
+#include "mc/server/commands/CommandOutput.h"
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/item/ItemStack.h"
 #include "mc/world/inventory/network/ItemStackRequestActionHandler.h"
@@ -8,7 +9,7 @@
 namespace my_mod {
 
 void registerWandCommand() {
-    auto& registrar = ll::command::CommandRegistrar::getInstance();
+    auto& registrar = ll::command::CommandRegistrar::getInstance(false);
 
     auto wandCmd = registrar.getOrCreateCommand("wand", "Get the WorldEdit wand");
     wandCmd.overload().execute([](CommandOrigin const& origin, CommandOutput& output) {
@@ -27,4 +28,3 @@ void registerWandCommand() {
 }
 
 }
-
