@@ -1,13 +1,15 @@
-
 #include "WorldEditMod.h"
 #include "ll/api/command/CommandRegistrar.h"
+#include "ll/api/command/CommandHandle.h"
 #include "ll/api/command/Command.h"
+#include "mc/server/commands/CommandOutput.h"
 #include "mc/world/actor/player/Player.h"
+#include "mc/deps/core/math/Vec3.h"
 
 namespace my_mod {
 
 void registerPosCommands() {
-    auto& registrar = ll::command::CommandRegistrar::getInstance();
+    auto& registrar = ll::command::CommandRegistrar::getInstance(false);
 
     auto pos1Cmd = registrar.getOrCreateCommand("pos1", "Set position 1");
     pos1Cmd.overload().execute([](CommandOrigin const& origin, CommandOutput& output) {
@@ -18,7 +20,7 @@ void registerPosCommands() {
         }
 
         auto* player = static_cast<Player*>(entity);
-        BlockPos pos = player->getBlockPos();
+        BlockPos pos(player->getPosition());
         
         WorldEditMod::getInstance().getSessionManager().setPos1(*player, pos);
         
@@ -34,7 +36,7 @@ void registerPosCommands() {
         }
 
         auto* player = static_cast<Player*>(entity);
-        BlockPos pos = player->getBlockPos();
+        BlockPos pos(player->getPosition());
 
         WorldEditMod::getInstance().getSessionManager().setPos2(*player, pos);
 
@@ -43,4 +45,3 @@ void registerPosCommands() {
 }
 
 }
-
