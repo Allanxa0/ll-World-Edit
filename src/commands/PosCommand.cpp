@@ -11,7 +11,7 @@ namespace my_mod {
 void registerPosCommands() {
     auto& registrar = ll::command::CommandRegistrar::getInstance(false);
 
-    auto pos1Cmd = registrar.getOrCreateCommand("pos1", "Set position 1");
+    auto& pos1Cmd = registrar.getOrCreateCommand("pos1", "Set position 1");
     pos1Cmd.overload().execute([](CommandOrigin const& origin, CommandOutput& output) {
         auto* entity = origin.getEntity();
         if (!entity || !entity->isType(ActorType::Player)) {
@@ -27,7 +27,7 @@ void registerPosCommands() {
         output.success("First position set to " + std::to_string(pos.x) + ", " + std::to_string(pos.y) + ", " + std::to_string(pos.z));
     });
 
-    auto pos2Cmd = registrar.getOrCreateCommand("pos2", "Set position 2");
+    auto& pos2Cmd = registrar.getOrCreateCommand("pos2", "Set position 2");
     pos2Cmd.overload().execute([](CommandOrigin const& origin, CommandOutput& output) {
         auto* entity = origin.getEntity();
         if (!entity || !entity->isType(ActorType::Player)) {
