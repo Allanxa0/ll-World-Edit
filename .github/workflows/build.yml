@@ -31,7 +31,7 @@ jobs:
 
       - run: xmake f -a x64 -m release -p windows --target_type=${{ matrix.target_type }} -y
 
-      - run: xmake -v -y -k
+      - run: xmake --keep-going -v -y
 
       - uses: actions/upload-artifact@v4
         with:
