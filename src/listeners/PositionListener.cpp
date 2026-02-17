@@ -1,14 +1,12 @@
 #include "PositionListener.h"
 #include "WorldEditMod.h"
 #include "ll/api/event/EventBus.h"
-#include "mc/world/events/PlayerDestroyBlockEvent.h"
-#include "mc/world/events/PlayerInteractWithBlockBeforeEvent.h"
+#include "ll/api/event/player/PlayerDestroyBlockEvent.h"
+#include "ll/api/event/player/PlayerInteractBlockEvent.h"
 #include "mc/world/item/ItemStack.h"
 #include "mc/world/item/Item.h"
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/level/BlockPos.h"
-#include "ll/api/event/player/PlayerDestroyBlockEvent.h"
-#include "ll/api/event/player/PlayerInteractBlockEvent.h"
 
 namespace my_mod {
 
@@ -22,7 +20,8 @@ void PositionListener::registerListeners() {
             auto& item = player.getSelectedItem();
             if (!item.isNull() && item.getItem() && item.getItem()->getSerializedName() == "minecraft:wooden_axe") {
                 
-                BlockPos pos = ev.blockPos();
+                // Según PlayerDestroyBlockEvent.cpp, el método es pos()
+                BlockPos pos = ev.pos();
                 
                 WorldEditMod::getInstance().getSessionManager().setPos1(player, pos);
                 
@@ -40,6 +39,7 @@ void PositionListener::registerListeners() {
             auto& item = player.getSelectedItem();
             if (!item.isNull() && item.getItem() && item.getItem()->getSerializedName() == "minecraft:wooden_axe") {
                 
+                // Según PlayerInteractBlockEvent.h, el método es blockPos()
                 BlockPos pos = ev.blockPos();
                 
                 WorldEditMod::getInstance().getSessionManager().setPos2(player, pos);
