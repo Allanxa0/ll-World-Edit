@@ -1,28 +1,33 @@
 #include "PositionListener.h"
 #include "WorldEditMod.h"
 #include "ll/api/event/EventBus.h"
-#include "ll/api/event/player/PlayerAttackBlockEvent.h"
-#include "ll/api/event/player/PlayerInteractBlockEvent.h"
+#include "mc/world/events/PlayerDestroyBlockEvent.h"
+#include "mc/world/events/PlayerInteractWithBlockBeforeEvent.h"
 #include "mc/world/item/ItemStack.h"
 #include "mc/world/item/Item.h"
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/level/BlockPos.h"
+#include "ll/api/event/player/PlayerDestroyBlockEvent.h"
+#include "ll/api/event/player/PlayerInteractBlockEvent.h"
 
 namespace my_mod {
 
 void PositionListener::registerListeners() {
     auto& bus = ll::event::EventBus::getInstance();
 
-    bus.addListener<ll::event::player::PlayerAttackBlockEvent>(
-        [](ll::event::player::PlayerAttackBlockEvent& ev) {
+    bus.addListener<ll::event::player::PlayerDestroyBlockEvent>(
+        [](ll::event::player::PlayerDestroyBlockEvent& ev) {
             auto& player = ev.self();
-            if (!player.isOperator()) return;
-
-            auto& item = player.getSelectedItem();
             
+            auto& item = player.getSelectedItem();
             if (!item.isNull() && item.getItem() && item.getItem()->getSerializedName() == "minecraft:wooden_axe") {
-                WorldEditMod::getInstance().getSessionManager().setPos1(player, ev.blockPos());
-                player.sendMessage("§dPosition 1 set to " + ev.blockPos().toString());
+                
+                BlockPos pos = ev.blockPos();
+                
+                WorldEditMod::getInstance().getSessionManager().setPos1(player, pos);
+                
+                player.sendMessage("§dPrimera posición establecida en " + pos.toString());
+                
                 ev.cancel();
             }
         }
@@ -31,13 +36,16 @@ void PositionListener::registerListeners() {
     bus.addListener<ll::event::player::PlayerInteractBlockEvent>(
         [](ll::event::player::PlayerInteractBlockEvent& ev) {
             auto& player = ev.self();
-            if (!player.isOperator()) return;
 
             auto& item = player.getSelectedItem();
-            
             if (!item.isNull() && item.getItem() && item.getItem()->getSerializedName() == "minecraft:wooden_axe") {
-                WorldEditMod::getInstance().getSessionManager().setPos2(player, ev.blockPos());
-                player.sendMessage("§dPosition 2 set to " + ev.blockPos().toString());
+                
+                BlockPos pos = ev.blockPos();
+                
+                WorldEditMod::getInstance().getSessionManager().setPos2(player, pos);
+                
+                player.sendMessage("§dSegunda posición establecida en " + pos.toString());
+                
                 ev.cancel();
             }
         }
