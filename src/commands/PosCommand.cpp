@@ -7,6 +7,8 @@
 #include "mc/deps/core/math/Vec3.h"
 #include "mc/world/level/BlockSource.h"
 #include "mc/world/phys/HitResult.h"
+#include "mc/world/level/ShapeType.h"
+#include "mc/world/level/dimension/Dimension.h"
 
 namespace my_mod {
 
@@ -17,7 +19,18 @@ BlockPos getTargetBlock(Player* player) {
     Vec3 dir = player->getViewVector(1.0f);
     Vec3 end = pos + (dir * maxDist);
 
-    HitResult hit = player->getDimension().getBlockSourceFromMainChunkSource().checkBlockRayTrace(pos, end, false, false, false);
+    HitResult hit = player->getDimension().getBlockSourceFromMainChunkSource().clip(
+        pos, 
+        end, 
+        false, 
+        ShapeType::Outline, 
+        static_cast<int>(maxDist), 
+        false, 
+        false, 
+        player, 
+        nullptr, 
+        false
+    );
     
     if (hit.mType == HitResultType::Block) {
         return hit.mBlockPos;
