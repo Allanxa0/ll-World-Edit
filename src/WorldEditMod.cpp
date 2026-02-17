@@ -20,16 +20,6 @@ bool WorldEditMod::load() {
 bool WorldEditMod::enable() {
     WECommands::registerCommands();
     PositionListener::registerListeners();
-
-    auto& bus = ll::event::EventBus::getInstance();
-
-    auto listener = ll::event::Listener<ll::event::player::PlayerDisconnectEvent>::create(
-        [this](ll::event::player::PlayerDisconnectEvent& ev) {
-            mSessionManager.removeSelection(ev.self());
-        }
-    );
-    bus.addListener(listener);
-
     return true;
 }
 
@@ -40,3 +30,4 @@ bool WorldEditMod::disable() {
 }
 
 LL_REGISTER_MOD(my_mod::WorldEditMod, my_mod::WorldEditMod::getInstance());
+

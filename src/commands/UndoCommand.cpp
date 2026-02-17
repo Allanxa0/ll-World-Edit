@@ -24,7 +24,7 @@ ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
     redoList.reserve(action.blocks.size());
 
     auto startTime = std::chrono::steady_clock::now();
-    const auto timeBudget = std::chrono::milliseconds(30);
+    const auto timeBudget = std::chrono::milliseconds(25);
 
     for (auto it = action.blocks.rbegin(); it != action.blocks.rend(); ++it) {
         if (it->dim != player->getDimensionId()) continue;
@@ -45,6 +45,8 @@ ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
                 NewUniqueIdsDataLoadHelper helper;
                 helper.mLevel = &player->getLevel();
                 actor->loadBlockData(*it->oldNbt, region, helper);
+                actor->onChanged(region);
+                actor->refresh(region);
             }
         }
 

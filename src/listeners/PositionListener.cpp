@@ -19,8 +19,15 @@ void PositionListener::registerListeners() {
         auto& item = player.getSelectedItem();
         
         if (!item.isNull() && item.getItem() && item.getItem()->getSerializedName() == "minecraft:wooden_axe") {
+            if (!WorldEditMod::getInstance().getSessionManager().canUseWand(player)) {
+                ev.cancel(); 
+                return;
+            }
+
             BlockPos pos = ev.pos();
             WorldEditMod::getInstance().getSessionManager().setPos1(player, pos);
+            WorldEditMod::getInstance().getSessionManager().updateWandUsage(player);
+            
             player.sendMessage("§dPrimera posición establecida en " + pos.toString());
             ev.cancel();
         }
@@ -32,8 +39,15 @@ void PositionListener::registerListeners() {
         auto& item = player.getSelectedItem();
 
         if (!item.isNull() && item.getItem() && item.getItem()->getSerializedName() == "minecraft:wooden_axe") {
+            if (!WorldEditMod::getInstance().getSessionManager().canUseWand(player)) {
+                ev.cancel();
+                return;
+            }
+
             BlockPos pos = ev.blockPos();
             WorldEditMod::getInstance().getSessionManager().setPos2(player, pos);
+            WorldEditMod::getInstance().getSessionManager().updateWandUsage(player);
+
             player.sendMessage("§dSegunda posición establecida en " + pos.toString());
             ev.cancel();
         }
@@ -42,3 +56,4 @@ void PositionListener::registerListeners() {
 }
 
 }
+
