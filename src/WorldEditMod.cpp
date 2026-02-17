@@ -3,6 +3,7 @@
 #include "listeners/PositionListener.h"
 #include "ll/api/mod/RegisterHelper.h"
 #include "ll/api/event/EventBus.h"
+#include "ll/api/event/Listener.h"
 #include "ll/api/event/player/PlayerDisconnectEvent.h"
 
 namespace my_mod {
@@ -22,11 +23,12 @@ bool WorldEditMod::enable() {
 
     auto& bus = ll::event::EventBus::getInstance();
 
-    bus.addListener<ll::event::player::PlayerDisconnectEvent>(
+    auto listener = ll::event::Listener<ll::event::player::PlayerDisconnectEvent>::create(
         [this](ll::event::player::PlayerDisconnectEvent& ev) {
             mSessionManager.removeSelection(ev.self());
         }
     );
+    bus.addListener(listener);
 
     return true;
 }
@@ -38,4 +40,3 @@ bool WorldEditMod::disable() {
 }
 
 LL_REGISTER_MOD(my_mod::WorldEditMod, my_mod::WorldEditMod::getInstance());
-
