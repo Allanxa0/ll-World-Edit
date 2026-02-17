@@ -4,6 +4,7 @@
 #include "ll/api/command/Command.h"
 #include "mc/server/commands/CommandOutput.h"
 #include "mc/server/commands/CommandBlockName.h"
+#include "mc/server/commands/CommandBlockNameResult.h"
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/level/BlockSource.h"
 #include "mc/world/level/block/Block.h"
@@ -58,7 +59,7 @@ std::vector<PatternEntry> parsePattern(const std::string& input, CommandOutput& 
         }
 
         auto blockOpt = Block::tryGetFromRegistry(blockName);
-        if (!blockOpt.has_value()) {
+        if (!blockOpt) {
             output.error("Invalid block in pattern: " + blockName);
             return {};
         }
@@ -180,7 +181,8 @@ void registerSetCommand() {
                 return;
             }
 
-            const Block* blk = params.blockName.getBlock();
+            auto result = params.blockName.resolveBlock(0);
+            const Block* blk = result.mBlock;
             if (!blk) {
                 output.error("Unknown block.");
                 return;
@@ -216,4 +218,3 @@ void registerSetCommand() {
 }
 
 }
-
