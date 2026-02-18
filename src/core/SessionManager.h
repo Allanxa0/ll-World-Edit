@@ -44,10 +44,15 @@ public:
     void pushRedo(Player& player, EditAction&& action);
     std::optional<EditAction> popRedo(Player& player);
 
+    void updateSelectionVisuals(Player& player);
+    void clearSelectionVisuals(Player& player);
+    void onPlayerLeft(Player& player);
+
 private:
     std::unordered_map<std::string, PlayerSession> mSessions;
     std::unordered_map<std::string, std::deque<EditAction>> mUndoHistory;
     std::unordered_map<std::string, std::deque<EditAction>> mRedoHistory;
+    std::unordered_map<std::string, std::vector<BlockPos>> mVisualBlocks;
 
     static constexpr int MAX_HISTORY_SIZE = 10;
     static constexpr int WAND_COOLDOWN_MS = 400;

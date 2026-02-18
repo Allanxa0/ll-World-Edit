@@ -13,6 +13,7 @@
 #include "mc/dataloadhelper/NewUniqueIdsDataLoadHelper.h"
 #include "mc/world/level/Level.h"
 #include <chrono>
+#include <string>
 
 namespace my_mod {
 
@@ -24,6 +25,7 @@ ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
     redoList.reserve(action.blocks.size());
 
     auto startTime = std::chrono::steady_clock::now();
+    auto measureStart = std::chrono::high_resolution_clock::now();
     const auto timeBudget = std::chrono::milliseconds(25);
 
     for (auto it = action.blocks.rbegin(); it != action.blocks.rend(); ++it) {
@@ -57,7 +59,11 @@ ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
     }
 
     WorldEditMod::getInstance().getSessionManager().pushRedo(*player, {std::move(redoList)});
-    player->sendMessage("§aUndo completed successfully.");
+    
+    auto measureEnd = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(measureEnd - measureStart).count();
+    
+    player->sendMessage("§aUndo completed successfully. Time taken: " + std::to_string(duration) + "ms");
     co_return;
 }
 
@@ -90,3 +96,4 @@ void registerUndoCommand() {
 }
 
 }
+

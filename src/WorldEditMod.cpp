@@ -20,6 +20,13 @@ bool WorldEditMod::load() {
 bool WorldEditMod::enable() {
     WECommands::registerCommands();
     PositionListener::registerListeners();
+
+    auto& bus = ll::event::EventBus::getInstance();
+    auto disconnectListener = ll::event::Listener<ll::event::player::PlayerDisconnectEvent>::create([](ll::event::player::PlayerDisconnectEvent& ev) {
+        WorldEditMod::getInstance().getSessionManager().onPlayerLeft(ev.self());
+    });
+    bus.addListener<ll::event::player::PlayerDisconnectEvent>(disconnectListener);
+
     return true;
 }
 

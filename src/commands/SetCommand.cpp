@@ -132,6 +132,7 @@ ll::coro::CoroTask<void> executeSetTask(Player* player, BlockPos p1, BlockPos p2
 
     std::mt19937 rng(std::random_device{}());
     auto startTime = std::chrono::steady_clock::now();
+    auto measureStart = std::chrono::high_resolution_clock::now();
     const auto timeBudget = std::chrono::milliseconds(25);
 
     for (const auto& [chunkPos, blocks] : chunkBatches) {
@@ -161,7 +162,11 @@ ll::coro::CoroTask<void> executeSetTask(Player* player, BlockPos p1, BlockPos p2
     }
 
     WorldEditMod::getInstance().getSessionManager().pushHistory(*player, {std::move(undoHistory)});
-    player->sendMessage("§aOperation completed. " + std::to_string(count) + " blocks affected.");
+    
+    auto measureEnd = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(measureEnd - measureStart).count();
+
+    player->sendMessage("§aOperation completed. " + std::to_string(count) + " blocks affected. Time taken: " + std::to_string(duration) + "ms");
     co_return;
 }
 
@@ -219,3 +224,4 @@ void registerSetCommand() {
 }
 
 }
+
