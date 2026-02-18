@@ -92,7 +92,7 @@ void SessionManager::clearSelectionVisuals(Player& player) {
         packet.mPos = pos;
         packet.mLayer = 0;
         packet.mUpdateFlags = 3;
-        packet.mRuntimeId = realBlock.mRuntimeId;
+        packet.mRuntimeId = realBlock.mNetworkId;
         
         player.sendNetworkPacket(packet);
     }
@@ -119,7 +119,7 @@ void SessionManager::updateSelectionVisuals(Player& player) {
     auto visualBlockOpt = Block::tryGetFromRegistry(HashedString("minecraft:glass"));
     if (!visualBlockOpt) return; 
     
-    uint32_t visualRuntimeId = visualBlockOpt->mRuntimeId;
+    uint32_t visualRuntimeId = visualBlockOpt->mNetworkId;
 
     std::vector<BlockPos>& visuals = mVisualBlocks[player.getXuid()];
     
