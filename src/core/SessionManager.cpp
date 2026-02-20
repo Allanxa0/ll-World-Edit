@@ -4,6 +4,7 @@
 #include "mc/network/packet/UpdateBlockPacket.h"
 #include "mc/world/level/block/Block.h"
 #include "mc/deps/core/string/HashedString.h"
+#include "mc/network/NetworkBlockPosition.h"
 #include <algorithm>
 
 namespace my_mod {
@@ -89,7 +90,7 @@ void SessionManager::clearSelectionVisuals(Player& player) {
         const Block& realBlock = region.getBlock(pos);
         UpdateBlockPacket packet;
         
-        packet.mPos = pos;
+        packet.mPos = NetworkBlockPosition(pos);
         packet.mLayer = 0;
         packet.mUpdateFlags = 3;
         packet.mRuntimeId = realBlock.mNetworkId;
@@ -140,7 +141,7 @@ void SessionManager::updateSelectionVisuals(Player& player) {
                     visuals.push_back(pos);
 
                     UpdateBlockPacket packet;
-                    packet.mPos = pos;
+                    packet.mPos = NetworkBlockPosition(pos);
                     packet.mLayer = 0;
                     packet.mUpdateFlags = 3;
                     packet.mRuntimeId = visualRuntimeId;
