@@ -15,6 +15,10 @@
 #include "ll/api/coro/CoroTask.h"
 #include "ll/api/thread/ServerThreadExecutor.h"
 #include "ll/api/chrono/GameChrono.h"
+#include "ll/api/service/Bedrock.h"
+#include "mc/world/level/Level.h"
+#include "mc/world/level/block/BlockType.h"
+#include <string_view>
 
 namespace my_mod {
 
@@ -23,15 +27,16 @@ struct DrainParams {
 };
 
 ll::coro::CoroTask<void> executeDrainTask(std::string xuid, BlockPos center, int radius, DimensionType dim) {
-    auto playerOpt = ll::service::getLevel()->getPlayerByXuid(xuid);
-    if (!playerOpt) co_return;
-    Player* player = playerOpt;
+    auto levelOpt = ll::service::getLevel();
+    if (!levelOpt.has_value()) co_return;
+    Player* player = levelOpt->getPlayerByXuid(xuid);
+    if (!player) co_return;
 
     int r = std::min(radius, 50);
     auto& region = player->getDimension().getBlockSourceFromMainChunkSource();
     BlockChangeContext context(true);
 
-    const Block* airBlock = Block::tryGetFromRegistry("minecraft:air").value_or(nullptr);
+    const Block* airBlock = Block::tryGetFromRegistry(std::string_view("minecraft:air")).value_or(nullptr);
     if (!airBlock) co_return;
 
     std::map<ChunkPos, std::vector<BlockPos>> chunkBatches;
@@ -61,7 +66,7 @@ ll::coro::CoroTask<void> executeDrainTask(std::string xuid, BlockPos center, int
         for (const auto& targetPos : blocks) {
             const Block& oldBlock = region.getBlock(targetPos);
             
-            if (oldBlock.getMaterial().isLiquid()) {
+            if (oldBlock.getBlockType().getMaterial().isLiquid()) {
                 std::unique_ptr<CompoundTag> oldNbt = nullptr;
                 if (auto* actor = region.getBlockEntity(targetPos)) {
                     oldNbt = std::make_unique<CompoundTag>();
@@ -89,9 +94,12 @@ ll::coro::CoroTask<void> executeDrainTask(std::string xuid, BlockPos center, int
         }
     }
 
-    if (auto currentP = ll::service::getLevel()->getPlayerByXuid(xuid)) {
-        WorldEditMod::getInstance().getSessionManager().pushHistory(*currentP, {std::move(undoHistory)});
-        currentP->sendMessage("§aDrained " + std::to_string(replacedCount) + " liquid blocks.");
+    auto currentLevelOpt = ll::service::getLevel();
+    if (currentLevelOpt.has_value()) {
+        if (auto currentP = currentLevelOpt->getPlayerByXuid(xuid)) {
+            WorldEditMod::getInstance().getSessionManager().pushHistory(*currentP, {std::move(undoHistory)});
+            currentP->sendMessage("§aDrained " + std::to_string(replacedCount) + " liquid blocks.");
+        }
     }
     co_return;
 }
@@ -114,4 +122,3 @@ void registerDrainCommand() {
 }
 
 }
-
