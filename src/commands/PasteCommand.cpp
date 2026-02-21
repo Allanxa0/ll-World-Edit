@@ -15,6 +15,7 @@
 #include "ll/api/coro/CoroTask.h"
 #include "ll/api/thread/ServerThreadExecutor.h"
 #include "ll/api/chrono/GameChrono.h"
+#include "ll/api/service/Bedrock.h"
 #include "mc/dataloadhelper/NewUniqueIdsDataLoadHelper.h"
 #include "mc/world/level/Level.h"
 #include <map>
