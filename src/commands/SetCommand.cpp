@@ -18,6 +18,7 @@
 #include "ll/api/coro/CoroTask.h"
 #include "ll/api/thread/ServerThreadExecutor.h"
 #include "ll/api/chrono/GameChrono.h"
+#include "ll/api/service/Bedrock.h"
 #include <algorithm>
 #include <map>
 #include <vector>
@@ -212,4 +213,3 @@ void registerSetCommand() {
 }
 
 }
-
