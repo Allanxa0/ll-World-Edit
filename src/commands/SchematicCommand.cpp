@@ -27,7 +27,7 @@ void registerSchematicCommand() {
     auto& registrar = ll::command::CommandRegistrar::getInstance(false);
     
     auto& schemCmd = registrar.getOrCreateCommand("schem", "Manage schematics");
-    registrar.getOrCreateAlias("schematics", schemCmd);
+    schemCmd.alias("schematics");
 
     schemCmd.overload().execute([](CommandOrigin const& origin, CommandOutput& output) {
         auto dir = WorldEditMod::getInstance().getSelf().getConfigDir() / "schematics";
@@ -84,4 +84,3 @@ void registerSchematicCommand() {
 }
 
 }
-
