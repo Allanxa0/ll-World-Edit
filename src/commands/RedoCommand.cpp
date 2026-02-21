@@ -7,7 +7,7 @@
 #include "mc/world/level/BlockSource.h"
 #include "mc/world/level/block/BlockChangeContext.h"
 #include "mc/world/level/block/actor/BlockActor.h"
-#include "mc/world/level/block/actor/SaveContext.h"
+#include "mc/world/item/SaveContext.h"
 #include "ll/api/coro/CoroTask.h"
 #include "ll/api/thread/ServerThreadExecutor.h"
 #include "ll/api/chrono/GameChrono.h"
