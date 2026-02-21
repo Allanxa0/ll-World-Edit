@@ -144,7 +144,8 @@ ll::coro::CoroTask<void> executeSetTask(Player* player, BlockPos p1, BlockPos p2
             std::unique_ptr<CompoundTag> oldNbt = nullptr;
             if (auto* actor = region.getBlockEntity(targetPos)) {
                 oldNbt = std::make_unique<CompoundTag>();
-                actor->saveBlockData(*oldNbt, region);
+                actor->save(*oldNbt);
+                region.removeBlockEntity(targetPos);
             }
 
             const Block* blockToSet = resolvePattern(pattern, rng);
@@ -224,4 +225,3 @@ void registerSetCommand() {
 }
 
 }
-

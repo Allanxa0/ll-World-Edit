@@ -35,7 +35,8 @@ ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
         std::unique_ptr<CompoundTag> currentNbt = nullptr;
         if (auto* actor = region.getBlockEntity(it->pos)) {
             currentNbt = std::make_unique<CompoundTag>();
-            actor->saveBlockData(*currentNbt, region);
+            actor->save(*currentNbt);
+            region.removeBlockEntity(it->pos);
         }
 
         redoList.push_back({it->pos, &currentBlock, std::move(currentNbt), it->dim});
@@ -46,7 +47,7 @@ ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
             if (auto* actor = region.getBlockEntity(it->pos)) {
                 NewUniqueIdsDataLoadHelper helper;
                 helper.mLevel = &player->getLevel();
-                actor->loadBlockData(*it->oldNbt, region, helper);
+                actor->load(player->getLevel(), *it->oldNbt, helper);
                 actor->onChanged(region);
                 actor->refresh(region);
             }
@@ -96,4 +97,3 @@ void registerUndoCommand() {
 }
 
 }
-
