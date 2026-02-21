@@ -38,7 +38,7 @@ ll::coro::CoroTask<void> executeDrainTask(std::string xuid, BlockPos center, int
 
     auto airBlockOpt = Block::tryGetFromRegistry("minecraft:air");
     if (!airBlockOpt) co_return;
-    const Block* airBlock = &(*airBlockOpt);
+    const Block& airBlock = airBlockOpt.value();
 
     std::map<ChunkPos, std::vector<BlockPos>> chunkBatches;
     
@@ -77,7 +77,7 @@ ll::coro::CoroTask<void> executeDrainTask(std::string xuid, BlockPos center, int
                 }
 
                 undoHistory.push_back({targetPos, &oldBlock, std::move(oldNbt), dim});
-                region.setBlock(targetPos, *airBlock, 3, nullptr, context);
+                region.setBlock(targetPos, airBlock, 3, nullptr, context);
                 replacedCount++;
             }
 
