@@ -10,11 +10,10 @@ class WorldEditMod {
 public:
     static WorldEditMod& getInstance();
 
-    WorldEditMod()
-        : mSelf(*ll::mod::NativeMod::current()) {}
+    WorldEditMod() = default;
 
     [[nodiscard]] ll::mod::NativeMod& getSelf() const {
-        return mSelf;
+        return *ll::mod::NativeMod::current();
     }
 
     [[nodiscard]] SessionManager& getSessionManager() {
@@ -30,10 +29,8 @@ public:
     bool disable();
 
 private:
-    ll::mod::NativeMod& mSelf;
     SessionManager mSessionManager;
     Config mConfig;
 };
 
 }
-
