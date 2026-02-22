@@ -12,13 +12,20 @@
 #include "ll/api/thread/ServerThreadExecutor.h"
 #include "ll/api/chrono/GameChrono.h"
 #include "mc/dataloadhelper/NewUniqueIdsDataLoadHelper.h"
+#include "ll/api/service/Bedrock.h"
 #include "mc/world/level/Level.h"
 #include <chrono>
 #include <string>
 
 namespace my_mod {
 
-ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
+ll::coro::CoroTask<void> executeUndoTask(std::string xuid, EditAction action) {
+    auto levelOpt = ll::service::getLevel();
+    if (!levelOpt) co_return;
+    
+    auto* player = levelOpt->getPlayerByXuid(xuid);
+    if (!player) co_return;
+
     auto& region = player->getDimension().getBlockSourceFromMainChunkSource();
     BlockChangeContext context(true);
     
@@ -26,11 +33,13 @@ ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
     redoList.reserve(action.blocks.size());
 
     auto startTime = std::chrono::steady_clock::now();
-    auto measureStart = std::chrono::high_resolution_clock::now();
     const auto timeBudget = std::chrono::milliseconds(25);
 
     for (auto it = action.blocks.rbegin(); it != action.blocks.rend(); ++it) {
-        if (it->dim != player->getDimensionId()) continue;
+        auto* currentPlayer = levelOpt->getPlayerByXuid(xuid);
+        if (!currentPlayer) co_return;
+
+        if (it->dim != currentPlayer->getDimensionId()) continue;
 
         const Block& currentBlock = region.getBlock(it->pos);
         std::unique_ptr<CompoundTag> currentNbt = nullptr;
@@ -41,14 +50,13 @@ ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
         }
 
         redoList.push_back({it->pos, &currentBlock, std::move(currentNbt), it->dim});
-
         region.setBlock(it->pos, *it->oldBlock, 3, nullptr, context);
 
         if (it->oldNbt) {
             if (auto* actor = region.getBlockEntity(it->pos)) {
                 NewUniqueIdsDataLoadHelper helper;
-                helper.mLevel = &player->getLevel();
-                actor->load(player->getLevel(), *it->oldNbt, helper);
+                helper.mLevel = &currentPlayer->getLevel();
+                actor->load(currentPlayer->getLevel(), *it->oldNbt, helper);
                 actor->onChanged(region);
                 actor->refresh(region);
             }
@@ -60,12 +68,10 @@ ll::coro::CoroTask<void> executeUndoTask(Player* player, EditAction action) {
         }
     }
 
-    WorldEditMod::getInstance().getSessionManager().pushRedo(*player, {std::move(redoList)});
-    
-    auto measureEnd = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(measureEnd - measureStart).count();
-    
-    player->sendMessage("§aUndo completed successfully. Time taken: " + std::to_string(duration) + "ms");
+    if (auto* finalPlayer = levelOpt->getPlayerByXuid(xuid)) {
+        WorldEditMod::getInstance().getSessionManager().pushRedo(*finalPlayer, {std::move(redoList)});
+        finalPlayer->sendMessage("§aUndo completed.");
+    }
     co_return;
 }
 
@@ -75,24 +81,15 @@ void registerUndoCommand() {
 
     undoCmd.overload().execute([](CommandOrigin const& origin, CommandOutput& output) {
         auto* entity = origin.getEntity();
-        if (!entity || !entity->isType(ActorType::Player)) {
-            output.error("Only players can use this command");
-            return;
-        }
+        if (!entity || !entity->isType(ActorType::Player)) return;
 
         auto* player = static_cast<Player*>(entity);
-        if (!player->isOperator()) {
-            output.error("You do not have permission to use this command.");
-            return;
-        }
+        if (!player->isOperator()) return;
 
         auto actionOpt = WorldEditMod::getInstance().getSessionManager().popUndo(*player);
-
         if (actionOpt.has_value()) {
-            executeUndoTask(player, std::move(actionOpt.value())).launch(ll::thread::ServerThreadExecutor::getDefault());
-            output.success("§aUndo operation started...");
-        } else {
-            output.error("Nothing to undo.");
+            executeUndoTask(player->getXuid(), std::move(actionOpt.value())).launch(ll::thread::ServerThreadExecutor::getDefault());
+            output.success("Undo operation started...");
         }
     });
 }

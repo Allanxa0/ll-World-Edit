@@ -15,12 +15,14 @@ WorldEditMod& WorldEditMod::getInstance() {
 }
 
 bool WorldEditMod::load() {
-    ll::config::loadConfig(mConfig, getSelf().getConfigDir() / "config.json");
-    ll::config::saveConfig(mConfig, getSelf().getConfigDir() / "config.json");
     return true;
 }
 
 bool WorldEditMod::enable() {
+    auto& self = getSelf();
+    ll::config::loadConfig(mConfig, self.getConfigDir() / "config.json");
+    ll::config::saveConfig(mConfig, self.getConfigDir() / "config.json");
+
     WECommands::registerCommands();
     PositionListener::registerListeners();
 
@@ -40,4 +42,3 @@ bool WorldEditMod::disable() {
 }
 
 LL_REGISTER_MOD(my_mod::WorldEditMod, my_mod::WorldEditMod::getInstance());
-
