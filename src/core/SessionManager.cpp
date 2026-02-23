@@ -9,6 +9,7 @@
 #include "mc/network/NetworkBlockPosition.h"
 #include "mc/nbt/CompoundTag.h"
 #include "mc/world/level/ChunkPos.h"
+#include "mc/deps/core/math/Vec3.h"
 #include <algorithm>
 
 namespace my_mod {
@@ -148,8 +149,8 @@ void SessionManager::updateSelectionVisuals(Player& player) {
     player.sendNetworkPacket(dataPacket);
 }
 
-void SessionManager::checkAndResendVisuals(Player& player) {
-    ChunkPos currentChunk(player.getPosition());
+void SessionManager::checkAndResendVisuals(Player& player, const Vec3& pos) {
+    ChunkPos currentChunk((int)pos.x >> 4, (int)pos.z >> 4);
     auto& session = mSessions[player.getXuid()];
     if (session.lastChunkPos != currentChunk) {
         session.lastChunkPos = currentChunk;

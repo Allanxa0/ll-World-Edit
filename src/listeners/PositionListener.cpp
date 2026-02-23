@@ -5,11 +5,14 @@
 #include "ll/api/event/player/PlayerDestroyBlockEvent.h"
 #include "ll/api/event/player/PlayerInteractBlockEvent.h"
 #include "ll/api/event/player/PlayerJoinEvent.h"
-#include "ll/api/event/player/PlayerMoveEvent.h"
+#include "ll/api/event/network/PacketReceiveEvent.h"
+#include "mc/network/packet/MovePlayerPacket.h"
+#include "mc/network/MinecraftPacketIds.h"
 #include "mc/world/item/ItemStack.h"
 #include "mc/world/item/Item.h"
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/level/BlockPos.h"
+#include "mc/deps/core/math/Vec3.h"
 
 namespace my_mod {
 
@@ -55,11 +58,16 @@ void PositionListener::registerListeners() {
     });
     bus.addListener<ll::event::player::PlayerJoinEvent>(joinListener);
 
-    auto moveListener = ll::event::Listener<ll::event::player::PlayerMoveEvent>::create([](ll::event::player::PlayerMoveEvent& ev) {
-        WorldEditMod::getInstance().getSessionManager().checkAndResendVisuals(ev.self());
+    auto moveListener = ll::event::Listener<ll::event::network::PacketReceiveEvent>::create([](ll::event::network::PacketReceiveEvent& ev) {
+        if (ev.packet()->getId() == MinecraftPacketIds::MovePlayer) {
+            auto* movePacket = static_cast<MovePlayerPacket*>(ev.packet());
+            auto* player = ev.player();
+            if (player) {
+                WorldEditMod::getInstance().getSessionManager().checkAndResendVisuals(*player, movePacket->mPos.get());
+            }
+        }
     });
-    bus.addListener<ll::event::player::PlayerMoveEvent>(moveListener);
+    bus.addListener<ll::event::network::PacketReceiveEvent>(moveListener);
 }
 
 }
-

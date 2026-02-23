@@ -3,6 +3,7 @@
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/level/block/Block.h"
 #include "mc/nbt/CompoundTag.h"
+#include "mc/deps/core/math/Vec3.h"
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -57,7 +58,7 @@ public:
     void updateSelectionVisuals(Player& player);
     void clearSelectionVisuals(Player& player);
     void onPlayerLeft(Player& player);
-    void checkAndResendVisuals(Player& player);
+    void checkAndResendVisuals(Player& player, const Vec3& pos);
 
 private:
     std::unordered_map<std::string, PlayerSession> mSessions;
@@ -68,4 +69,3 @@ private:
 };
 
 }
-
