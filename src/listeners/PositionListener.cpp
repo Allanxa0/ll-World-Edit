@@ -17,6 +17,18 @@
 
 namespace my_mod {
 
+class MovePlayerHandler : public ll::network::PacketHandlerBase<MovePlayerHandler, MovePlayerPacket> {
+public:
+    void handlePacket(const NetworkIdentifier& netId, NetEventCallback& callback, const MovePlayerPacket& packet) const {
+        Player* player = callback.getScenePlayer();
+        if (player) {
+            WorldEditMod::getInstance().getSessionManager().checkAndResendVisuals(*player, packet.mPos.get());
+        }
+    }
+};
+
+static MovePlayerHandler movePlayerHandlerInstance;
+
 void PositionListener::registerListeners() {
     auto& bus = ll::event::EventBus::getInstance();
 
