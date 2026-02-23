@@ -124,6 +124,11 @@ void registerPasteCommand() {
         if (!entity || !entity->isType(ActorType::Player)) return;
         auto* player = static_cast<Player*>(entity);
 
+        if (!player->isOperator()) {
+            output.error("Solo los operadores pueden usar este comando.");
+            return;
+        }
+
         executePasteTask(player->getXuid(), player->getPosition(), player->getDimensionId())
             .launch(ll::thread::ServerThreadExecutor::getDefault());
         output.success("Paste operation started...");

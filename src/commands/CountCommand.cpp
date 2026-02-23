@@ -56,7 +56,7 @@ ll::coro::CoroTask<void> executeCountTask(Player* player, BlockPos p1, BlockPos 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
 
     std::string result = "Operation completed in " + std::to_string(duration) + "ms\n";
-    result += "Changed: " + std::to_string(totalBlocks) + " en el área seleccionada\n";
+    result += "Changed: " + std::to_string(totalBlocks) + " en el area seleccionada\n";
     result += "Tipos de bloques:\n";
     for (const auto& [name, count] : blockCounts) {
         std::string display = name;
@@ -79,6 +79,11 @@ void registerCountCommand() {
         if (!entity || !entity->isType(ActorType::Player)) return;
         auto* player = static_cast<Player*>(entity);
 
+        if (!player->isOperator()) {
+            output.error("Solo los operadores pueden usar este comando.");
+            return;
+        }
+
         auto& session = WorldEditMod::getInstance().getSessionManager().getSelection(*player);
         if (!session.isComplete() || session.dimId.value() != player->getDimensionId()) {
             output.error("Invalid selection.");
@@ -92,4 +97,3 @@ void registerCountCommand() {
 }
 
 }
-

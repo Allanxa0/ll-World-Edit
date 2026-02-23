@@ -119,6 +119,11 @@ void registerDrainCommand() {
             if (!entity || !entity->isType(ActorType::Player)) return;
             auto* player = static_cast<Player*>(entity);
 
+            if (!player->isOperator()) {
+                output.error("Solo los operadores pueden usar este comando.");
+                return;
+            }
+
             executeDrainTask(player->getXuid(), player->getPosition(), params.radius, player->getDimensionId())
                 .launch(ll::thread::ServerThreadExecutor::getDefault());
             output.success("Drain operation started...");
