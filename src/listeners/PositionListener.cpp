@@ -5,9 +5,10 @@
 #include "ll/api/event/player/PlayerDestroyBlockEvent.h"
 #include "ll/api/event/player/PlayerInteractBlockEvent.h"
 #include "ll/api/event/player/PlayerJoinEvent.h"
-#include "ll/api/event/network/PacketReceiveEvent.h"
+#include "ll/api/network/packet/Packet.h"
 #include "mc/network/packet/MovePlayerPacket.h"
 #include "mc/network/MinecraftPacketIds.h"
+#include "mc/network/NetEventCallback.h"
 #include "mc/world/item/ItemStack.h"
 #include "mc/world/item/Item.h"
 #include "mc/world/actor/player/Player.h"
@@ -15,6 +16,18 @@
 #include "mc/deps/core/math/Vec3.h"
 
 namespace my_mod {
+
+class MovePlayerHandler : public ll::network::PacketHandlerBase<MovePlayerHandler, MovePlayerPacket> {
+public:
+    void handlePacket(const NetworkIdentifier& netId, NetEventCallback& callback, const MovePlayerPacket& packet) const {
+        Player* player = callback.getScenePlayer();
+        if (player) {
+            WorldEditMod::getInstance().getSessionManager().checkAndResendVisuals(*player, packet.mPos.get());
+        }
+    }
+};
+
+static MovePlayerHandler movePlayerHandlerInstance;
 
 void PositionListener::registerListeners() {
     auto& bus = ll::event::EventBus::getInstance();
@@ -57,17 +70,6 @@ void PositionListener::registerListeners() {
         WorldEditMod::getInstance().getSessionManager().updateSelectionVisuals(ev.self());
     });
     bus.addListener<ll::event::player::PlayerJoinEvent>(joinListener);
-
-    auto moveListener = ll::event::Listener<ll::event::network::PacketReceiveEvent>::create([](ll::event::network::PacketReceiveEvent& ev) {
-        if (ev.packet()->getId() == MinecraftPacketIds::MovePlayer) {
-            auto* movePacket = static_cast<MovePlayerPacket*>(ev.packet());
-            auto* player = ev.player();
-            if (player) {
-                WorldEditMod::getInstance().getSessionManager().checkAndResendVisuals(*player, movePacket->mPos.get());
-            }
-        }
-    });
-    bus.addListener<ll::event::network::PacketReceiveEvent>(moveListener);
 }
 
 }

@@ -11,6 +11,7 @@
 #include "mc/world/level/ChunkPos.h"
 #include "mc/deps/core/math/Vec3.h"
 #include <algorithm>
+#include <cmath>
 
 namespace my_mod {
 
@@ -150,9 +151,9 @@ void SessionManager::updateSelectionVisuals(Player& player) {
 }
 
 void SessionManager::checkAndResendVisuals(Player& player, const Vec3& pos) {
-    ChunkPos currentChunk((int)pos.x >> 4, (int)pos.z >> 4);
+    ChunkPos currentChunk(static_cast<int>(std::floor(pos.x)) >> 4, static_cast<int>(std::floor(pos.z)) >> 4);
     auto& session = mSessions[player.getXuid()];
-    if (session.lastChunkPos != currentChunk) {
+    if (session.lastChunkPos.x != currentChunk.x || session.lastChunkPos.z != currentChunk.z) {
         session.lastChunkPos = currentChunk;
         if (session.selection.isComplete()) {
             updateSelectionVisuals(player);
