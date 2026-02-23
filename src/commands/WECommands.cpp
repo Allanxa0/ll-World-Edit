@@ -11,6 +11,7 @@ void registerCopyCommand();
 void registerPasteCommand();
 void registerDrainCommand();
 void registerSchematicCommand();
+void registerCountCommand();
 
 void WECommands::registerCommands() {
     registerPosCommands();
@@ -22,6 +23,7 @@ void WECommands::registerCommands() {
     registerPasteCommand();
     registerDrainCommand();
     registerSchematicCommand();
+    registerCountCommand();
 }
 
 }
