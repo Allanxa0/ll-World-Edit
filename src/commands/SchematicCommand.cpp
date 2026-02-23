@@ -6,6 +6,8 @@
 #include "mc/world/actor/player/Player.h"
 #include "mc/nbt/CompoundTag.h"
 #include "mc/nbt/ListTag.h"
+#include "mc/nbt/IntTag.h"
+#include "mc/nbt/ShortTag.h"
 #include "mc/world/level/block/Block.h"
 #include <filesystem>
 #include <fstream>
@@ -31,7 +33,7 @@ void registerSchematicCommand() {
     auto& schemCmd = registrar.getOrCreateCommand("schematic");
     schemCmd.alias("schem");
 
-    schemCmd.overload().execute([](CommandOrigin const& origin, CommandOutput& output) {
+    schemCmd.overload().execute([](CommandOrigin const&, CommandOutput& output) {
         auto dir = WorldEditMod::getInstance().getSelf().getConfigDir() / "schematics";
         std::string list = "§aSchematics disponibles:\n";
         bool found = false;
@@ -49,8 +51,8 @@ void registerSchematicCommand() {
 
     schemCmd.overload<SchematicParams>()
         .required("filename")
-        .execute([](CommandOrigin const& origin, CommandOutput& output, SchematicParams const& params) {
-            auto* entity = origin.getEntity();
+        .execute([](CommandOrigin const&, CommandOutput& output, SchematicParams const& params) {
+            auto* entity = CommandOrigin::getEntity();
             if (!entity || !entity->isType(ActorType::Player)) return;
             auto* player = static_cast<Player*>(entity);
 
@@ -89,32 +91,35 @@ void registerSchematicCommand() {
             std::vector<ClipboardItem> clipboard;
 
             if (nbtResult->contains("size")) {
-                auto const& sizeList = nbtResult->getList("size");
-                if (sizeList.size() >= 3) {
-                    int width = sizeList.get(0).getInt();
-                    int height = sizeList.get(1).getInt();
-                    int length = sizeList.get(2).getInt();
-                    count = width * height * length;
+                auto const& sizeTag = (*nbtResult)["size"];
+                if (sizeTag.isListTag()) {
+                    auto const& sizeList = sizeTag.asListTag();
+                    if (sizeList.size() >= 3) {
+                        int width = sizeList.get(0)->as<IntTag>().mValue;
+                        int height = sizeList.get(1)->as<IntTag>().mValue;
+                        int length = sizeList.get(2)->as<IntTag>().mValue;
+                        count = width * height * length;
 
-                    auto airOpt = Block::tryGetFromRegistry("minecraft:air");
-                    const Block* defaultBlock = airOpt ? &(*airOpt) : nullptr;
-                    
-                    clipboard.reserve(count);
-                    for (int x = 0; x < width; ++x) {
-                        for (int y = 0; y < height; ++y) {
-                            for (int z = 0; z < length; ++z) {
-                                clipboard.push_back({BlockPos(x, y, z), defaultBlock, nullptr});
+                        auto airOpt = Block::tryGetFromRegistry(std::string_view("minecraft:air"));
+                        const Block* defaultBlock = airOpt ? &(*airOpt) : nullptr;
+                        
+                        clipboard.reserve(count);
+                        for (int x = 0; x < width; ++x) {
+                            for (int y = 0; y < height; ++y) {
+                                for (int z = 0; z < length; ++z) {
+                                    clipboard.push_back({BlockPos(x, y, z), defaultBlock, nullptr});
+                                }
                             }
                         }
                     }
                 }
             } else if (nbtResult->contains("Width")) {
-                int width = nbtResult->getShort("Width");
-                int height = nbtResult->getShort("Height");
-                int length = nbtResult->getShort("Length");
+                int width = (*nbtResult)["Width"].as<ShortTag>().mValue;
+                int height = (*nbtResult)["Height"].as<ShortTag>().mValue;
+                int length = (*nbtResult)["Length"].as<ShortTag>().mValue;
                 count = width * height * length;
 
-                auto airOpt = Block::tryGetFromRegistry("minecraft:air");
+                auto airOpt = Block::tryGetFromRegistry(std::string_view("minecraft:air"));
                 const Block* defaultBlock = airOpt ? &(*airOpt) : nullptr;
 
                 clipboard.reserve(count);
@@ -136,4 +141,3 @@ void registerSchematicCommand() {
 }
 
 }
-
