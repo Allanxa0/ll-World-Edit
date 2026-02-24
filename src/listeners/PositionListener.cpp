@@ -5,29 +5,37 @@
 #include "ll/api/event/player/PlayerDestroyBlockEvent.h"
 #include "ll/api/event/player/PlayerInteractBlockEvent.h"
 #include "ll/api/event/player/PlayerJoinEvent.h"
-#include "ll/api/network/packet/Packet.h"
-#include "mc/network/packet/MovePlayerPacket.h"
-#include "mc/network/MinecraftPacketIds.h"
-#include "mc/network/NetEventCallback.h"
 #include "mc/world/item/ItemStack.h"
 #include "mc/world/item/Item.h"
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/level/BlockPos.h"
-#include "mc/deps/core/math/Vec3.h"
+#include "ll/api/coro/CoroTask.h"
+#include "ll/api/thread/ServerThreadExecutor.h"
+#include "ll/api/chrono/GameChrono.h"
+#include "ll/api/service/Bedrock.h"
+#include "mc/world/level/Level.h"
+#include <chrono>
 
 namespace my_mod {
 
-class MovePlayerHandler : public ll::network::PacketHandlerBase<MovePlayerHandler, MovePlayerPacket> {
-public:
-    void handlePacket(const NetworkIdentifier& netId, NetEventCallback& callback, const MovePlayerPacket& packet) const {
-        Player* player = callback.getScenePlayer();
-        if (player) {
-            WorldEditMod::getInstance().getSessionManager().checkAndResendVisuals(*player, packet.mPos.get());
-        }
+ll::coro::CoroTask<void> visualUpdateTask() {
+    while (true) {
+        co_await ll::chrono::seconds(3);
+        auto levelOpt = ll::service::getLevel();
+        if (!levelOpt.has_value()) continue;
+        
+        levelOpt->forEachPlayer([](Player& player) -> bool {
+            if (player.isOperator()) {
+                auto& sessionManager = WorldEditMod::getInstance().getSessionManager();
+                auto& sel = sessionManager.getSelection(player);
+                if (sel.isComplete() && sel.dimId.has_value() && sel.dimId.value() == player.getDimensionId()) {
+                    sessionManager.updateSelectionVisuals(player);
+                }
+            }
+            return true;
+        });
     }
-};
-
-static MovePlayerHandler movePlayerHandlerInstance;
+}
 
 void PositionListener::registerListeners() {
     auto& bus = ll::event::EventBus::getInstance();
@@ -70,9 +78,8 @@ void PositionListener::registerListeners() {
         WorldEditMod::getInstance().getSessionManager().updateSelectionVisuals(ev.self());
     });
     bus.addListener<ll::event::player::PlayerJoinEvent>(joinListener);
+
+    visualUpdateTask().launch(ll::thread::ServerThreadExecutor::getDefault());
 }
 
 }
-
-
-

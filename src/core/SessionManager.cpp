@@ -150,22 +150,9 @@ void SessionManager::updateSelectionVisuals(Player& player) {
     player.sendNetworkPacket(dataPacket);
 }
 
-void SessionManager::checkAndResendVisuals(Player& player, const Vec3& pos) {
-    ChunkPos currentChunk(static_cast<int>(std::floor(pos.x)) >> 4, static_cast<int>(std::floor(pos.z)) >> 4);
-    auto& session = mSessions[player.getXuid()];
-    if (session.lastChunkPos.x != currentChunk.x || session.lastChunkPos.z != currentChunk.z) {
-        session.lastChunkPos = currentChunk;
-        if (session.selection.isComplete()) {
-            updateSelectionVisuals(player);
-        }
-    }
-}
-
 void SessionManager::onPlayerLeft(Player& player) {
     mVisualBlocks.erase(player.getXuid());
     mSessions.erase(player.getXuid());
 }
 
 }
-
-

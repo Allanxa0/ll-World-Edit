@@ -34,7 +34,6 @@ struct ClipboardItem {
 struct PlayerSession {
     Selection selection;
     std::chrono::steady_clock::time_point lastWandUse;
-    ChunkPos lastChunkPos = ChunkPos(0, 0);
 };
 
 class SessionManager {
@@ -58,7 +57,6 @@ public:
     void updateSelectionVisuals(Player& player);
     void clearSelectionVisuals(Player& player);
     void onPlayerLeft(Player& player);
-    void checkAndResendVisuals(Player& player, const Vec3& pos);
 
 private:
     std::unordered_map<std::string, PlayerSession> mSessions;
@@ -69,6 +67,3 @@ private:
 };
 
 }
-
-
-
