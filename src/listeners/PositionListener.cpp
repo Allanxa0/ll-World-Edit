@@ -16,11 +16,13 @@
 #include "mc/world/level/Level.h"
 #include <chrono>
 
+using namespace std::chrono_literals;
+
 namespace my_mod {
 
 ll::coro::CoroTask<void> visualUpdateTask() {
     while (true) {
-        co_await ll::chrono::seconds(3);
+        co_await 3s;
         auto levelOpt = ll::service::getLevel();
         if (!levelOpt.has_value()) continue;
         
