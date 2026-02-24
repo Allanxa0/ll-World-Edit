@@ -1,4 +1,3 @@
-ruta:src/commands/SchematicCommand.cpp
 #include "WorldEditMod.h"
 #include "ll/api/command/CommandRegistrar.h"
 #include "ll/api/command/CommandHandle.h"
@@ -11,6 +10,7 @@ ruta:src/commands/SchematicCommand.cpp
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <string_view>
 
 namespace my_mod {
 
@@ -97,14 +97,15 @@ void registerSchematicCommand() {
                     int length = (int)sizeList[2];
                     count = width * height * length;
 
-                    auto airOpt = Block::tryGetFromRegistry("minecraft:air");
+                    auto airOpt = Block::tryGetFromRegistry(std::string_view("minecraft:air"));
                     const Block* defaultBlock = airOpt ? &(*airOpt) : nullptr;
                     
                     clipboard.reserve(count);
                     for (int x = 0; x < width; ++x) {
                         for (int y = 0; y < height; ++y) {
                             for (int z = 0; z < length; ++z) {
-                                clipboard.push_back({BlockPos(x, y, z), defaultBlock, nullptr});
+                                std::unique_ptr<CompoundTag> blockNbt = nullptr;
+                                clipboard.push_back({BlockPos(x, y, z), defaultBlock, std::move(blockNbt)});
                             }
                         }
                     }
@@ -115,14 +116,15 @@ void registerSchematicCommand() {
                 int length = (int)nbtResult->at("Length");
                 count = width * height * length;
 
-                auto airOpt = Block::tryGetFromRegistry("minecraft:air");
+                auto airOpt = Block::tryGetFromRegistry(std::string_view("minecraft:air"));
                 const Block* defaultBlock = airOpt ? &(*airOpt) : nullptr;
 
                 clipboard.reserve(count);
                 for (int x = 0; x < width; ++x) {
                     for (int y = 0; y < height; ++y) {
                         for (int z = 0; z < length; ++z) {
-                            clipboard.push_back({BlockPos(x, y, z), defaultBlock, nullptr});
+                            std::unique_ptr<CompoundTag> blockNbt = nullptr;
+                            clipboard.push_back({BlockPos(x, y, z), defaultBlock, std::move(blockNbt)});
                         }
                     }
                 }
