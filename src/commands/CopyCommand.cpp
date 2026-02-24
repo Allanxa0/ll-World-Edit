@@ -84,11 +84,6 @@ void registerCopyCommand() {
         if (!entity || !entity->isType(ActorType::Player)) return;
         auto* player = static_cast<Player*>(entity);
 
-        if (!player->isOperator()) {
-            output.error("Solo los operadores pueden usar este comando.");
-            return;
-        }
-
         auto& session = WorldEditMod::getInstance().getSessionManager().getSelection(*player);
         if (!session.isComplete() || session.dimId.value() != player->getDimensionId()) {
             output.error("Invalid selection.");
@@ -102,3 +97,7 @@ void registerCopyCommand() {
 }
 
 }
+
+
+
+

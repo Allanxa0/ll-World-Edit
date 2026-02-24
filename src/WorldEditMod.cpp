@@ -42,3 +42,6 @@ bool WorldEditMod::disable() {
 }
 
 LL_REGISTER_MOD(my_mod::WorldEditMod, my_mod::WorldEditMod::getInstance());
+
+
+

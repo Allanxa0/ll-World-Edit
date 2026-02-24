@@ -21,13 +21,10 @@ void registerPosCommands() {
         }
 
         auto* player = static_cast<Player*>(entity);
-        if (!player->isOperator()) {
-            output.error("Solo los operadores pueden usar este comando.");
-            return;
-        }
-
         BlockPos pos(player->getPosition());
+        
         WorldEditMod::getInstance().getSessionManager().setPos1(*player, pos);
+        
         output.success("First position set to " + pos.toString());
     });
 
@@ -40,15 +37,16 @@ void registerPosCommands() {
         }
 
         auto* player = static_cast<Player*>(entity);
-        if (!player->isOperator()) {
-            output.error("Solo los operadores pueden usar este comando.");
-            return;
-        }
-
         BlockPos pos(player->getPosition());
+
         WorldEditMod::getInstance().getSessionManager().setPos2(*player, pos);
+
         output.success("Second position set to " + pos.toString());
     });
 }
 
 }
+
+
+
+
